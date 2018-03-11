@@ -1,11 +1,14 @@
 import random
+import sys
 import time
 
 import itchat
 import requests
+from sqlalchemy import create_engine
+from sqlalchemy.orm import sessionmaker
 
-KEY = ""
-USER_ID = "wxchat"
+from entity import Base
+from entity import chatcontent
 
 
 def get_response_v2(msg):
@@ -36,14 +39,29 @@ def get_response_v2(msg):
 def tuling_reply(msg):
     defaultReply = msg['Text']
     reply = get_response_v2(msg['Text'])
+    record2db(msg['User']['NickName'], msg['Text'], reply)
     time.sleep(random.randint(3, 5))
     return reply or defaultReply
 
 
-def main():
-    itchat.auto_login(hotReload=False)
-    itchat.run()
+def record2db(from_u, recv_c, send_c):
+    session = DBSession()
+    try:
+        record = chatcontent.ChatContent(time.strftime('%Y-%m-%d %H:%M:%S'), from_u, recv_c, send_c)
+        session.add(record)
+        session.commit()
+    except:
+        print("Unexpected error:", sys.exc_info()[0])
+        session.rollback()
+    finally:
+        session.close()
 
 
 if __name__ == "__main__":
-    main()
+    KEY = "4ef16f8363b749579eef202c81b3b8b4"
+    USER_ID = "wxchat"
+    ENGINE = create_engine("mysql+pymysql://root:123456@127.0.0.1:3306/chocolatedisco?charset=utf8", echo=False)
+    Base.metadata.create_all(ENGINE)
+    DBSession = sessionmaker(bind=ENGINE)
+    itchat.auto_login(hotReload=False)
+    itchat.run()
