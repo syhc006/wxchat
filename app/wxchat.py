@@ -58,7 +58,7 @@ def record2db(from_u, recv_c, send_c):
 
 
 if __name__ == "__main__":
-    KEY = "4ef16f8363b749579eef202c81b3b8b4"
+    KEY = ""
     USER_ID = "wxchat"
     ENGINE = create_engine("mysql+pymysql://root:123456@127.0.0.1:3306/chocolatedisco?charset=utf8", echo=False)
     Base.metadata.create_all(ENGINE)
